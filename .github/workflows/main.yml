@@ -4,17 +4,15 @@ name: Build EXE file
 
 on:
   schedule:
-    # Automatyczne uruchamianie raz w tygodniu, np. w poniedziałek o 2:00 AM UTC 
     - cron: '0 2 * * 1'
   push:
     branches:
       - master
-  workflow_dispatch: # ręczne uruchomienie przez użytkownika
+  workflow_dispatch:
 
 jobs:
   build:
     runs-on: windows-latest
-    # Domyślny shell to PowerShell, możesz zostawić lub zmienić na bash, np. shell: bash
 
     steps:
       - name: Checkout repository
@@ -23,14 +21,18 @@ jobs:
       - name: Uruchom skrypt konfigurujący środowisko (installResources.ps1)
         shell: pwsh
         run: .\installResources.ps1
+
       - name: Install Python and PyInstaller
         shell: pwsh
         run: |
           python -m ensurepip --upgrade
           python -m pip install --upgrade pip
-          python -m PyInstaller --onefile project.py
+          pip install pyinstaller
 
-      
+      - name: Build executable
+        shell: pwsh
+        run: python -m PyInstaller --onefile project.py
+
       - name: Upload executable artifact
         uses: actions/upload-artifact@v4
         with:
