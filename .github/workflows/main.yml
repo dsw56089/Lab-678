@@ -1,33 +1,33 @@
-name: Build .exe weekly and on push
+name: Build EXE file
 
 on:
   schedule:
-    # Uruchamiaj raz w tygodniu, np. w poniedziałek o 3:00 UTC (możesz zmienić)
-    - cron: '0 3 * * 1'
+    # Automatyczne uruchamianie raz w tygodniu, np. w poniedziałek o 2:00 AM UTC (możesz zmienić)
+    - cron: '0 2 * * 1'
   push:
     branches:
-      - main
-  workflow_dispatch:
+      - master
+  workflow_dispatch: # ręczne uruchomienie przez użytkownika
 
 jobs:
   build:
     runs-on: windows-latest
-    
+    # Domyślny shell to PowerShell, możesz zostawić lub zmienić na bash, np. shell: bash
 
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v3
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
-    - name: Run installResources.ps1 to set up environment
-      shell: pwsh
-      run: .\installResources.ps1
+      - name: Uruchom skrypt konfigurujący środowisko (installResources.ps1)
+        shell: pwsh
+        run: .\installResources.ps1
 
-    - name: Build exe with PyInstaller
-      shell: pwsh
-      run: pyinstaller --onefile project.py
+      - name: Build executable with PyInstaller
+        shell: pwsh
+        run: pyinstaller --onefile project.py
 
-    - name: Upload exe artifact
-      uses: actions/upload-artifact@v3
-      with:
-        name: built-exe
-        path: dist\project.exe
+      - name: Upload executable artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: my-built-exe
+          path: dist\project.exe
