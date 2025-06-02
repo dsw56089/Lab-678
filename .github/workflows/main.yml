@@ -1,3 +1,5 @@
+permissions:
+  contents: write
 name: Build EXE file
 
 on:
@@ -16,7 +18,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Uruchom skrypt konfigurujący środowisko (installResources.ps1)
         shell: pwsh
@@ -27,7 +29,7 @@ jobs:
         run: pyinstaller --onefile project.py
 
       - name: Upload executable artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: my-built-exe
           path: dist\project.exe
