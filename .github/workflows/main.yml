@@ -1,0 +1,33 @@
+name: Build .exe weekly and on push
+
+on:
+  schedule:
+    # Uruchamiaj raz w tygodniu, np. w poniedziałek o 3:00 UTC (możesz zmienić)
+    - cron: '0 3 * * 1'
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+    
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Run installResources.ps1 to set up environment
+      shell: pwsh
+      run: .\installResources.ps1
+
+    - name: Build exe with PyInstaller
+      shell: pwsh
+      run: pyinstaller --onefile project.py
+
+    - name: Upload exe artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: built-exe
+        path: dist\project.exe
