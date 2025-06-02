@@ -4,7 +4,7 @@ name: Build EXE file
 
 on:
   schedule:
-    # Automatyczne uruchamianie raz w tygodniu, np. w poniedziałek o 2:00 AM UTC (możesz zmienić)
+    # Automatyczne uruchamianie raz w tygodniu, np. w poniedziałek o 2:00 AM UTC 
     - cron: '0 2 * * 1'
   push:
     branches:
@@ -19,7 +19,11 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-
+    # 2. Ustawienie Pythona
+      - name: Setup Python 3.x
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
       - name: Uruchom skrypt konfigurujący środowisko (installResources.ps1)
         shell: pwsh
         run: .\installResources.ps1
