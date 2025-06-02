@@ -1,38 +1,57 @@
 permissions:
   contents: write
-name: Build EXE file
+
+name: Buduj i publikuj EXE
 
 on:
+  # 1) Uruchomienie automatyczne raz w tygodniu
   schedule:
-    - cron: '0 2 * * 1'
+    - cron:  '0 3 * * 0'    # niedziela o 03:00 UTC
+  # 2) Po każdym pushu na gałąź main
   push:
     branches:
-      - master
+      - main
+  # 3) Możliwość uruchomienia ręcznego przez użytkownika
   workflow_dispatch:
 
 jobs:
-  build:
+  build_exe:
+    name: Budowanie pliku EXE
     runs-on: windows-latest
 
     steps:
+      # 1. Pobranie kodu z repo
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v3
 
-      - name: Uruchom skrypt konfigurujący środowisko (installResources.ps1)
-        shell: pwsh
-        run: .\installResources.ps1
+      # 2. Ustawienie Pythona
+      - name: Setup Python 3.x
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
 
-      - name: Install Python and PyInstaller
+      # 3. Instalacja zależności
+      - name: Install dependencies via PowerShell
         shell: pwsh
         run: |
-          python -m ensurepip --upgrade
-          python -m pip install --upgrade pip
-          pip install pyinstaller
-
-      - name: Build executable
+          .\installResources.ps1
+      # 3.5 usunięcie starego pliku
+      - name: Remove old EXE if exists
         shell: pwsh
-        run: python -m PyInstaller --onefile main.py
-         # 6. Commit and push built EXE to main
+        run: |
+          if (Test-Path 'dist/konwerter-exe.exe') { Remove-Item 'dist/konwerter-exe.exe' }
+      # 4. Budowanie EXE za pomocą PyInstaller
+      - name: Build EXE with PyInstaller
+        shell: pwsh
+        run: |
+          pyinstaller --onefile --noconsole src/main.py
+
+      # 5. Zmień nazwę pliku na konwerter-exe
+      - name: Rename EXE to konwerter-exe
+        run: |
+          mv dist/main.exe dist/konwerter-exe.exe
+
+      # 6. Commit and push built EXE to main
       - name: Commit and push built EXE to main
         run: |
           git config --global user.name "github-actions[bot]"
@@ -43,8 +62,10 @@ jobs:
           git push origin main
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: Upload executable artifact
+
+      # Przesyłanie jako artifact
+      - name: Upload built EXE as artifact
         uses: actions/upload-artifact@v4
         with:
-          name: my-built-exe
-          path: dist\project.exe
+          name: konwerter-exe.exe
+          path: dist/konwerter-exe
