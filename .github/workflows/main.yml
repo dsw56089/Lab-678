@@ -19,19 +19,20 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-    # 2. Ustawienie Pythona
-      - name: Setup Python 3.x
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.x'
+
       - name: Uruchom skrypt konfigurujący środowisko (installResources.ps1)
         shell: pwsh
         run: .\installResources.ps1
+      - name: Install Python and PyInstaller
+        shell: pwsh
+        run: |
+          python -m ensurepip --upgrade
+          python -m pip install --upgrade pip
+          pip install pyinstaller
 
-      - name: Build executable with PyInstaller
+      - name: Build executable
         shell: pwsh
         run: pyinstaller --onefile project.py
-
       - name: Upload executable artifact
         uses: actions/upload-artifact@v4
         with:
